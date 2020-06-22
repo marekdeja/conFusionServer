@@ -1,61 +1,86 @@
 const express = require('express')
 const bodyParser = require('body-parser')
+const mongoose = require('mongoose')
+
+const Leaders = require('../models/leaders')
 
 const leadRouter = express.Router()
 
 leadRouter.use(bodyParser.json())
 
 leadRouter.route('/')
-    .all((req, res, next) => {
-        console.log(process.env.REACT_APP_FRONTEND)
-        res.status = 200;
-        res.setHeader('Content-Type', 'text/plain');
-        // res.setHeader('Access-Control-Allow-Origin', process.env.REACT_APP_FRONTEND);
-        next();
-    })
-
     .get((req, res, next) => {
-        console.log(process.env.REACT_APP_FRONTEND)
-        res.end('Will send all the leads to you')
-        
+        Leaders.find({})
+            .then((leaders) => {
+                res.status = 200;
+                res.setHeader('Content-Type', 'application/json');
+                res.json(leaders)
+            }, (err) => next(err))
+            .catch((err) => next(err))
     })
 
     .post((req, res, next) => {
-        res.end('Will add the lead: ' + req.body.name + ' with details: ' + req.body.description)
+        Leaders.create(req.body)
+            .then(leader => {
+                console.log('Leader created ', leader)
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json')
+                res.json(leader)
+            }, (err) => next(err))
+            .catch((err) => next(err))
     })
 
     .put((req, res, next) => {
         res.statusCode = 403;
-        res.end('PUT operation not suported on leads')
+        res.end('PUT operation not suported on leaders')
     })
 
     .delete((req, res, next) => {
-        res.end('Deleting all the leads')
+        Leaders.remove({})
+            .then((resp) => {
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json')
+                res.json(resp)
+            }, err => next(err))
+            .catch(err => next(err))
     })
 
 leadRouter.route('/:leadId')
-    .all((req, res, next) => {
-        res.status = 200;
-        res.setHeader('Content-Type', 'text/plain');
-        // res.setHeader('Access-Control-Allow-Origin', process.env.REACT_APP_FRONTEND);
-        next();
+    .get((req, res, next) => {
+        Leaders.findById(req.params.leadId)
+            .then(leader => {
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json')
+                res.json(leader)
+            }, err => next(err))
+            .catch(err => next(err))
     })
 
-    .get((req, res, next) => {
-        res.end('Will send the lead: ' + req.params.leadId + ' to you')
-    })
 
     .post((req, res, next) => {
         res.statusCode = 403;
-        res.end('POST operation not suported on /leaders/'+req.params.leadId)
+        res.end('POST operation not suported on /leaders/' + req.params.leadId)
     })
 
     .put((req, res, next) => {
-        res.end('Will update the leader: ' + req.params.leadId)
+        Leaders.findByIdAndUpdate(req.params.leadId, { $set: req.body }, { new: true })
+            .then((leader) => {
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json')
+                console.log('sth wrong??')
+                res.json(leader)
+            }, err => next(err))
+            .catch(err => next(err))
     })
 
     .delete((req, res, next) => {
-        res.end('Deleting the leader: '+ req.params.leadId)
+        Leaders.findByIdAndDelete(req.params.leadId)
+            .then(resp => {
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json')
+                res.json(resp)
+            }, err => next(err))
+            .catch(err => next(err))
     })
 
-    module.exports = leadRouter
+module.exports = leadRouter
