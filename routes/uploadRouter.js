@@ -3,6 +3,8 @@ const bodyParser = require('body-parser')
 const authenticate = require('../authenticate')
 const multer = require('multer')
 
+const cors = require('./cors')
+
 var storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, 'public/images')
@@ -27,12 +29,17 @@ const uploadRouter = express.Router()
 uploadRouter.use(bodyParser.json())
 
 uploadRouter.route('/')
-    .get(authenticate.verifyOrdinaryUser, authenticate.verifyAdmin, (req, res, next) => {
+    .options(cors.corsWithOptions, (req, res) => {
+        res.sendStatus(200)
+    })
+    .get(cors.cors, authenticate.verifyOrdinaryUser, authenticate.verifyAdmin, (req, res, next) => {
         res.statusCode = 403;
         res.end('GET operation not suported on /imageUpload')
     })
+
     //TODO: Why only small files are accepted? in postman: Error: read ECONNRESET
-    .post(authenticate.verifyOrdinaryUser, authenticate.verifyAdmin,
+
+    .post(cors.corsWithOptions, authenticate.verifyOrdinaryUser, authenticate.verifyAdmin,
         upload.single('imageFile'), (req, res, next) => {
             console.log(req)
             console.log(res)
@@ -41,11 +48,11 @@ uploadRouter.route('/')
             res.json(req.file)
 
         })
-    .put(authenticate.verifyOrdinaryUser, authenticate.verifyAdmin, (req, res, next) => {
+    .put(cors.corsWithOptions, authenticate.verifyOrdinaryUser, authenticate.verifyAdmin, (req, res, next) => {
         res.statusCode = 403;
         res.end('PUT operation not suported on /imageUpload')
     })
-    .delete(authenticate.verifyOrdinaryUser, authenticate.verifyAdmin, (req, res, next) => {
+    .delete(cors.corsWithOptions, authenticate.verifyOrdinaryUser, authenticate.verifyAdmin, (req, res, next) => {
         res.statusCode = 403;
         res.end('DELETE operation not suported on /imageUpload')
     })
