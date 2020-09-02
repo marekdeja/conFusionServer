@@ -1,0 +1,3 @@
+{"_id":{"$oid":"5eea75ed1496b047847f4c17"},"label":"New","featured":false,"name":"Weekend Grand Buffet and me","image":"images/buffet.png","price":{"$numberInt":"1999"},"description":"Featuring CHANGE","__v":{"$numberInt":"0"}}
+{"_id":{"$oid":"5eea765a1496b047847f4c18"},"label":"New","featured":false,"name":"Weekend DIl na kablu","image":"images/buffet.png","price":{"$numberInt":"21999"},"description":"Featuring CHANGE","__v":{"$numberInt":"0"}}
+{"_id":{"$oid":"5f292d1d281574137cd5feec"},"label":"New","featured":false,"name":"With Rob","image":"images/buffet.png","price":{"$numberInt":"1999"},"description":"Featuring CHANGE","__v":{"$numberInt":"0"}}
