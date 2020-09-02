@@ -34,13 +34,21 @@ favoriteRouter.route('/')
             Favorites.find({ user: reqUserId })
                 .then(favorite => {
                     if (favorite.length > 0) {
-                        console.log(favorite)
-                        console.log('exist')
-                        const newFavorites = req.body
-                        console.log('newFavorites', newFavorites)
-                        for (let i=0; i<newFavorites; i++){
-                            favorite.dishes.push(newFavorites[i])
-                        }                       
+                        const newFavorites = req.body                   
+                        for (let i = 0; i < newFavorites.length; i++) {
+                            console.log(favorite[0].dishes)
+                            //sprawdzic czy sie nie powtarzaja
+                            if (favorite[0].dishes.indexOf(newFavorites[i]._id) == -1) {
+                                favorite[0].dishes.push(newFavorites[i]._id)
+                            }
+
+                        }
+                        favorite[0].save()
+                            .then((favorite) => {
+                                res.statusCode = 200;
+                                res.setHeader('Content-Type', 'application/json');
+                                res.json(favorite);
+                            }, (err) => next(err));
                     } else {
                         Favorites.create({
                             "user": reqUserId,
@@ -54,7 +62,6 @@ favoriteRouter.route('/')
                             }, (err) => next(err))
                             .catch((err) => next(err))
                     }
-
                 }, err => next(err))
                 .catch((err) => next(err))
             // czy user sie zgadza
