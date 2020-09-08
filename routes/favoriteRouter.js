@@ -14,10 +14,10 @@ favoriteRouter.route('/')
     .options(cors.corsWithOptions, (req, res) => {
         res.sendStatus(200)
     })
-    .get(cors.cors, (req, res, next) => {
-        console.log('HEJKA')
-        Favorites.find({})
-            //     .populate('comments.author')
+    .get(cors.cors, authenticate.verifyOrdinaryUser, (req, res, next) => {
+        const reqUserId = req.user._id
+        Favorites.find({user: reqUserId})
+            .populate('dishes')
             .then((favorites) => {
                 res.statusCode = 200;
                 res.setHeader('Content-Type', 'application/json')
@@ -34,10 +34,10 @@ favoriteRouter.route('/')
             Favorites.find({ user: reqUserId })
                 .then(favorite => {
                     if (favorite.length > 0) {
-                        const newFavorites = req.body                   
+                        const newFavorites = req.body
                         for (let i = 0; i < newFavorites.length; i++) {
                             console.log(favorite[0].dishes)
-                            //sprawdzic czy sie nie powtarzaja
+                            //check if the dishes do not duplicate
                             if (favorite[0].dishes.indexOf(newFavorites[i]._id) == -1) {
                                 favorite[0].dishes.push(newFavorites[i]._id)
                             }
@@ -76,5 +76,33 @@ favoriteRouter.route('/')
             //     }, (err) => next(err))
             //     .catch((err) => next(err))
         })
+        .delete(cors.corsWithOptions,
+            authenticate.verifyOrdinaryUser,
+            (req, res, next) => {
+                const reqUserId = req.user._id
+                Favorites.find({user: reqUserId})
+                .then((userFavorite) => {
+                    console.log(userFavorite)
+                    //userFavorite[]
+                    if (userFavorite != null) {
+                        for (var i = (userFavorite.dishes.length - 1); i >= 0; i--) {
+                            userFavorite.dishes.id(userFavorite.dishes[i]._id).remove();
+                        }
+                        userFavorite.save()
+                            .then((userFavorite) => {
+                                res.statusCode = 200;
+                                res.setHeader('Content-Type', 'application/json');
+                                res.json(userFavorite);
+                            }, (err) => next(err));
+                    }
+                    else {
+                        err = new Error('Favorite list for  ' + reqUserId + ' not found');
+                        err.status = 404;
+                        return next(err);
+                    }
+                }, (err) => next(err))
+                .catch((err) => next(err));
+
+            })
 
 module.exports = favoriteRouter
